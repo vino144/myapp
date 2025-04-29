@@ -6,53 +6,52 @@ import 'package:permission_handler/permission_handler.dart';
 class MessageRepositoryImpl implements MessageRepository {
   final SmsQuery _query = SmsQuery();
 
-  Expense? parseMessageToExpense(SmsMessage sms) {
+  List<Expense> parseMessageToExpense(SmsMessage sms) {
     String body = sms.body ?? '';
     DateTime date = sms.date ?? DateTime.now();
+    List<Expense> expenses = [];
 
-    // Basic parsing for demonstration - improve this logic
-    double? amount;
-    String type = '';
-
-    // Example: Look for "debited" or "credited" keywords and extract amount
-    if (body.contains('debited')) {
-      type = 'debit';
-      RegExp exp = RegExp(r"debited by (\d+(\.\d+)?)");
-      RegExpMatch? match = exp.firstMatch(body);
-      if (match != null && match.groupCount >= 1) {
-        amount = double.tryParse(match.group(1) ?? '');
-      }
-    } else if (body.contains('credited')) {
-      type = 'credit';
-      RegExp exp = RegExp(r"credited by (\d+(\.\d+)?)");
-      RegExpMatch? match = exp.firstMatch(body);
-       if (match != null && match.groupCount >= 1) {
-        amount = double.tryParse(match.group(1) ?? '');
+    // More flexible regex for debit messages
+    RegExp debitExp = RegExp(
+        r"(?:debited|spent|paid|withdrawn|purchase|transfer|txn)\s*(?:of|by|for|rs\.?|inr\.?)\s*([\d,]+\.?\d*)",
+        caseSensitive: false);
+    final debitMatches = debitExp.allMatches(body);
+    for (final debitMatch in debitMatches) {
+      String amountStr = debitMatch.group(1)?.replaceAll(",", "") ?? "";
+      double? amount = double.tryParse(amountStr);
+      if (amount != null) {
+        expenses.add(Expense(
+            amount: amount, type: 'debit', date: date, description: body));
       }
     }
 
-    if (amount != null) {
-      return Expense(
-        amount: amount,
-        type: type,
-        date: date,
-        description: body,
-      );
+    // More flexible regex for credit messages
+    RegExp creditExp = RegExp(
+        r"(?:credited|received|deposit|credit)\s*(?:of|by|for|rs\.?|inr\.?)\s*([\d,]+\.?\d*)",
+        caseSensitive: false);
+    final creditMatches = creditExp.allMatches(body);
+    for (final creditMatch in creditMatches) {
+      String amountStr = creditMatch.group(1)?.replaceAll(",", "") ?? "";
+      double? amount = double.tryParse(amountStr);
+      if (amount != null) {
+        expenses.add(Expense(
+            amount: amount, type: 'credit', date: date, description: body));
+      }
     }
-    return null;
+    return expenses;
   }
 
-   @override
+  @override
   Future<List<Expense>> getAllExpenses() async {
     var permission = await Permission.sms.request();
+    List<Expense> expenses = [];
     if (permission.isGranted || permission.isLimited) {
       List<SmsMessage> messages = await _query.getAllSms;
-      List<Expense> expenses = [];
       for (SmsMessage sms in messages) {
-        Expense? expense = parseMessageToExpense(sms);
-        if (expense != null) {
-          expenses.add(expense);
-        }
+        List<Expense> messageExpenses = parseMessageToExpense(sms);
+        
+        expenses.addAll(messageExpenses);
+        
       }
       return expenses;
     } else {

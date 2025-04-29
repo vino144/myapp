@@ -1,11 +1,11 @@
+import 'package:expanse_traker/core/entities/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
-import 'package:myapp/core/entities/message.dart';
 import '../blocs/sms_bloc.dart';
 
 class ExpanseListScreen extends StatefulWidget {
-  const ExpanseListScreen({Key? key}) : super(key: key);
+  const ExpanseListScreen({super.key});
 
   @override
   State<ExpanseListScreen> createState() => _ExpanseListScreenState();
@@ -26,9 +26,9 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
     if (status.isGranted) {
     } else {
       // Handle if permission is denied permanently
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('SMS permission denied')),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('SMS permission denied')));
     }
   }
 
@@ -36,17 +36,17 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
     if (state is SmsLoading) {
       return const Center(child: CircularProgressIndicator());
     } else if (state is SmsLoaded) {
-      if (state.messages.isEmpty) {
-        return const Center(child: Text('No SMS messages found.'));
+      if (state.expenses.isEmpty) {
+        return const Center(child: Text('No expenses found.'));
       }
       return ListView.builder(
-        itemCount: state.messages.length,
+        itemCount: state.expenses.length,
         itemBuilder: (context, index) {
-          Message message = state.messages[index];
+          Expense expense = state.expenses[index];
           return ListTile(
-            title: Text(message.sender),
-            subtitle: Text(message.body),
-            trailing: Text(message.date.toString()),
+            title: Text('Amount: ${expense.amount}'),
+            subtitle: Text('Type: ${expense.type}'),
+            trailing: Text(expense.date.toString()),
           );
         },
       );
@@ -54,7 +54,7 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
       return Center(child: Text('Error: ${state.message}'));
     } else {
       return const Center(child: Text('No SMS messages found.'));
-    }
+    } 
   }
 
   @override
@@ -72,12 +72,13 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
         listener: (context, state) {
           if (state is SmsError) {
             print("Error: ${state.message}");
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(content: Text('Error: ${state.message}')),
-            );
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text('Error: ${state.message}')));
           }
         },
-       ),
+      ),
     );
   }
 }
+

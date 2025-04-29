@@ -1,12 +1,12 @@
-import '../entities/message.dart';
+import '../entities/expense.dart';
 import '../repositories/message_repository.dart';
 
-class GetAllSms {
+class GetAllExpenses {
   final MessageRepository messageRepository;
 
-  GetAllSms(this.messageRepository);
+  GetAllExpenses(this.messageRepository);
 
-  Future<List<Message>> call() async {
-    return await messageRepository.getAllSms();
+  Future<List<Expense>> call() async {
+    return await messageRepository.getAllExpenses();
   }
 }

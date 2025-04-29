@@ -1,6 +1,5 @@
 import 'package:equatable/equatable.dart';
-import 'package:myapp/core/entities/message.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:expanse_traker/core/entities/expense.dart';
 
 class SmsState extends Equatable {
   const SmsState();
@@ -9,4 +8,16 @@ class SmsState extends Equatable {
 }
 
 class SmsLoading extends SmsState {}
-class SmsLoaded extends SmsState { final List<Message> messages; const SmsLoaded({required this.messages}); @override List<Object?> get props => [messages];} class SmsError extends SmsState { final String message; const SmsError({required this.message}); @override List<Object?> get props => [message]; }
+
+class SmsLoaded extends SmsState {  final List<Expense> expenses;
+  const SmsLoaded({required this.expenses});
+  @override
+  List<Object?> get props => [expenses];
+}
+
+class SmsError extends SmsState {
+  final String message;
+  const SmsError({required this.message});
+  @override
+  List<Object?> get props => [message];
+}

@@ -1,5 +1,5 @@
-import '../entities/message.dart';
+import '../entities/expense.dart';
 
 abstract class MessageRepository {
-  Future<List<Message>> getAllSms();
+  Future<List<Expense>> getAllExpenses();
 }

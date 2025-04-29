@@ -1,6 +1,8 @@
 import 'package:expanse_traker/core/entities/expense.dart';
 import 'package:expanse_traker/core/repositories/message_repository.dart';
 import 'package:flutter_sms_inbox/flutter_sms_inbox.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class MessageRepositoryImpl implements MessageRepository {
@@ -69,22 +71,46 @@ class MessageRepositoryImpl implements MessageRepository {
     }
     return expenses;
   }
+  
 
   @override
   Future<List<Expense>> getAllExpenses() async {
     print("getAllExpenses - Starting getAllExpenses");
+
     var permission = await Permission.sms.request();
-    List<Expense> expenses = [];
+
     if (permission.isGranted || permission.isLimited) {
       List<SmsMessage> messages = await _query.getAllSms;
-      for (SmsMessage sms in messages) {
-        List<Expense> messageExpenses = parseMessageToExpense(sms);
-        
-        expenses.addAll(messageExpenses);
-        
-      }
       print("getAllExpenses - Number of messages read: ${messages.length}");
-      return expenses;
+
+      DateTime now = DateTime.now();
+      DateTime lastMonthStart = DateTime(now.year, now.month - 1, 1);
+      DateTime lastMonthEnd = DateTime(now.year, now.month, 0);
+
+      List<Expense> allExpenses = [];
+      for (SmsMessage message in messages) {
+        allExpenses.addAll(parseMessageToExpense(message));
+      }
+
+      List<Expense> lastMonthExpenses = allExpenses.where((expense) {
+        return expense.date.isAfter(lastMonthStart) &&
+            expense.date.isBefore(lastMonthEnd);
+      }).toList();
+
+      // Get the Firebase instance
+      FirebaseFirestore firestore = FirebaseFirestore.instance;
+
+      // Upload expenses to Firebase
+      for (Expense expense in lastMonthExpenses) {
+        await firestore.collection('expenses').add({
+          'amount': expense.amount,
+          'type': expense.type,
+          'date': expense.date,
+          'description': expense.description,
+        });
+      }
+      return lastMonthExpenses;
+
     } else {
       throw Exception("SMS permission not granted");
     }

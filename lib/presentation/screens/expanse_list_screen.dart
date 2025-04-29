@@ -2,6 +2,7 @@ import 'package:expanse_traker/core/entities/expense.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:permission_handler/permission_handler.dart';
+import 'package:expanse_traker/presentation/screens/expense_detail_screen.dart';
 import '../blocs/sms_bloc.dart';
 
 class ExpanseListScreen extends StatefulWidget {
@@ -49,16 +50,26 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
           }else if (expense.type == "debit"){
             icon = Icons.arrow_downward;
           }
-          return ListTile(
-            leading: Icon(icon),
-            title: Row(
-              children: [
-                const Icon(Icons.currency_rupee),
-                Text('${expense.amount}'),
-              ],
+          return GestureDetector(
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => ExpenseDetailScreen(expense: expense),
+                ),
+              );
+            },
+            child: ListTile(
+              leading: Icon(icon),
+              title: Row(
+                children: [
+                  const Icon(Icons.currency_rupee),
+                  Text('${expense.amount}'),
+                ],
+              ),
+              subtitle: Text('${expense.type}'),
+              trailing: Text('${expense.date.day}-${expense.date.month}-${expense.date.year}'),
             ),
-            subtitle: Text('${expense.type}'),
-            trailing: Text('${expense.date.day}-${expense.date.month}-${expense.date.year}'),
           );
         },
       );

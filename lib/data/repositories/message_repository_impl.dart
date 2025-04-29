@@ -23,11 +23,13 @@ class MessageRepositoryImpl implements MessageRepository {
   print('Debit Matches: $debitMatches');
 
   for (final debitMatch in debitMatches) {
-    String amountStr = debitMatch.group(1)?.replaceAll(",", "") ?? "";
-    if (amountStr == "") {
-      amountStr = debitMatch.group(2)?.replaceAll(",", "") ?? "";
+    String? amountStr = debitMatch.group(1)?.replaceAll(",", "");
+    if (amountStr == null || amountStr.isEmpty) {
+        amountStr = debitMatch.group(2)?.replaceAll(",", "");
     }
-    double? amount = double.tryParse(amountStr);
+
+      double? amount = double.tryParse(amountStr ?? '');
+
     if (amount != null) {
       expenses.add(Expense(
         amount: amount,
@@ -48,11 +50,13 @@ class MessageRepositoryImpl implements MessageRepository {
   print('Credit Matches: $creditMatches');
   for (final creditMatch in creditMatches) {
     String amountStr = creditMatch.group(1)?.replaceAll(",", "") ?? "";
-    if (amountStr == "") {
-      amountStr = creditMatch.group(2)?.replaceAll(",", "") ?? "";
+    if (amountStr == null || amountStr.isEmpty) {
+        amountStr = creditMatch.group(2)!.replaceAll(",", "");
     }
-    double? amount = double.tryParse(amountStr);
+      double? amount = double.tryParse(amountStr ?? '');
+
     if (amount != null) {
+
       expenses.add(Expense(
         amount: amount,
         type: 'credit',

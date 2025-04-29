@@ -43,10 +43,22 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
         itemCount: state.expenses.length,
         itemBuilder: (context, index) {
           Expense expense = state.expenses[index];
+          IconData icon = Icons.question_mark;
+          if(expense.type == "credit"){
+            icon = Icons.arrow_upward;
+          }else if (expense.type == "debit"){
+            icon = Icons.arrow_downward;
+          }
           return ListTile(
-            title: Text('Amount: ${expense.amount}'),
-            subtitle: Text('Type: ${expense.type}'),
-            trailing: Text(expense.date.toString()),
+            leading: Icon(icon),
+            title: Row(
+              children: [
+                const Icon(Icons.currency_rupee),
+                Text('${expense.amount}'),
+              ],
+            ),
+            subtitle: Text('${expense.type}'),
+            trailing: Text('${expense.date.day}-${expense.date.month}-${expense.date.year}'),
           );
         },
       );

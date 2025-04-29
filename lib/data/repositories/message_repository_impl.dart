@@ -97,6 +97,18 @@ class MessageRepositoryImpl implements MessageRepository {
             expense.date.isBefore(lastMonthEnd);
       }).toList();
 
+      print("getAllExpenses - lastMonthExpenses list size: ${lastMonthExpenses.length}");
+      if(lastMonthExpenses.isNotEmpty){
+        Expense firstExpense = lastMonthExpenses.first;
+        print("getAllExpenses - First expense: amount: ${firstExpense.amount}, type: ${firstExpense.type}, date: ${firstExpense.date}");
+      }
+
+      
+      
+
+
+      
+
       // Get the Firebase instance
       FirebaseFirestore firestore = FirebaseFirestore.instance;
 
@@ -107,7 +119,12 @@ class MessageRepositoryImpl implements MessageRepository {
           'type': expense.type,
           'date': expense.date,
           'description': expense.description,
-        });
+        }).catchError((error) {
+              print("getAllExpenses - Error uploading expense: $error");
+        });;
+        
+        
+        
       }
       return lastMonthExpenses;
 

@@ -34,10 +34,13 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
   }
 
   Widget _buildBody(BuildContext context, SmsState state) {
+    print('Current Sms State: $state');
     if (state is SmsLoading) {
+      print('Rendering SmsLoading state');
       return const Center(child: CircularProgressIndicator());
     } else if (state is SmsLoaded) {
-      if (state.expenses.isEmpty) {
+      print('Rendering SmsLoaded state with ${state.expenses.length} expenses');
+      if (state.expenses.isEmpty) {        
         return const Center(child: Text('No expenses found.'));
       }
       return ListView.builder(
@@ -74,6 +77,7 @@ class _ExpanseListScreenState extends State<ExpanseListScreen> {
         },
       );
     } else if (state is SmsError) {
+      print('Rendering SmsError state: ${state.message}');
       return Center(child: Text('Error: ${state.message}'));
     } else {
       return const Center(child: Text('No SMS messages found.'));
